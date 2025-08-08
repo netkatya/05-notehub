@@ -1,5 +1,5 @@
 import css from './NoteForm.module.css';
-import { Formik, Form, Field, FormikHelpers } from 'formik';
+import { Formik, Form, Field, FormikHelpers, ErrorMessage } from 'formik';
 
 interface FormValues {
     title: string;
@@ -7,36 +7,41 @@ interface FormValues {
     tag: string;
 }
 
+const initialFormValues:FormValues = {
+    title: '',
+    content: '',
+    tag: 'Todo',
+}
 
-
-export default function NoteForm {
+export default function NoteForm() {
 
     const handleSubmit = (
         values: FormValues,
-        FormikHelpers: FormikHelpers<FormValues>
+        formikHelpers: FormikHelpers<FormValues>
     ) => {
-        FormikHelpers.resetForm()
+        formikHelpers.resetForm()
     }
 
     
     return (
-        <Formik onSubmit={handleSubmit}>
+        <Formik initialValues={initialFormValues} onSubmit={handleSubmit}>
             <Form className={css.form}>
             <div className={css.formGroup}>
             <label htmlFor="title">Title</label>
             <Field id="title" type="text" name="title" className={css.input} />
-            <span name="title" className={css.error} />
+            <ErrorMessage name="title" className={css.error} />
   </div>
 
   <div className={css.formGroup}>
     <label htmlFor="content">Content</label>
     <Field
+        as="textarea"             
       id="content"
       name="content"
       rows={8}
       className={css.textarea}
     />
-    <span name="content" className={css.error} />
+    <ErrorMessage name="content" className={css.error} />
   </div>
 
   <div className={css.formGroup}>
@@ -48,7 +53,7 @@ export default function NoteForm {
       <option value="Meeting">Meeting</option>
       <option value="Shopping">Shopping</option>
     </Field>
-    <span name="tag" className={css.error} />
+    <ErrorMessage name="tag" className={css.error} />
   </div>
 
   <div className={css.actions}>
@@ -56,9 +61,9 @@ export default function NoteForm {
       Cancel
     </button>
     <button
-      type="submit"
-      className={css.submitButton}
-      disabled=false
+        type="submit"
+        className={css.submitButton}
+        disabled={false}
     >
       Create note
     </button>
