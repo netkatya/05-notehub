@@ -13,6 +13,8 @@
     padding: 16px 0;
     background-color: #f8f9fa;
     border-bottom: 1px solid #dee2e6;
+
+    
 }
 
 .button {
@@ -24,8 +26,17 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    margin-right: 20px;
 }
 
 .button:hover {
     background-color: #0b5ed7;
 }
+
+.notfound {
+    height: 660px;
+    width: 1280px;
+    text-align: center;
+}
+
+

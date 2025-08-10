@@ -9,6 +9,7 @@ import NoteForm from "../NoteForm/NoteForm";
 import Modal from "../Modal/Modal";
 import { useDebounce } from "use-debounce";
 import NoteList from "../NoteList/NoteList";
+import Loader from "../Loader/Loader";
 
 const App = () => {
   const [page, setPage] = useState(1);
@@ -71,8 +72,11 @@ const deleteNoteMutation = useMutation({
         </button>
       </header>
 
-      {isLoading && <p>Loading...</p>}
-      {isError && <p>Error: {(error as Error).message}</p>}
+        {isLoading && <Loader/>}
+        {isError && <p>Error: {(error as Error).message}</p>}
+        {data && data.notes.length === 0 && !isLoading && (
+            <p className={css.notfound}>No notes found for "{debouncedSearch}"</p>
+    )}
       {data && data.notes && data.notes.length > 0 && <NoteList notes={data.notes} onDelete={handleDelete} />}
       {isModalOpen && (
         <Modal onClose={closeModal}>
