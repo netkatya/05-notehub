@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import css from "./App.module.css";
 import SearchBox from "../SearchBox/SearchBox";
-import { fetchNotes, createNote, deleteNote } from "../../services/noteService";
+import { fetchNotes } from "../../services/noteService";
 import type { FetchNotesResponse } from "../../services/noteService";
 import Pagination from "../Pagination/Pagination";
 import NoteForm from "../NoteForm/NoteForm";
@@ -17,36 +17,41 @@ const App = () => {
   const [debouncedSearch] = useDebounce(search, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-  const { data, isLoading, isError, error } = useQuery<FetchNotesResponse>({
+  const { data, isFetching, isError, error } = useQuery<FetchNotesResponse>({
     queryKey: ["notes", debouncedSearch, page],
     queryFn: () => fetchNotes(debouncedSearch, page),
     placeholderData: (prev) => prev,
   });
 
-const createNoteMutation = useMutation({
-  mutationFn: createNote,
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["notes"] });
-    setIsModalOpen(false);
-  },
-});
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  }
 
-const deleteNoteMutation = useMutation({
-  mutationFn: deleteNote,
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["notes"] });
-  },
-});
+// const createNoteMutation = useMutation({
+//   mutationFn: createNote,
+//   onSuccess: () => {
+//     queryClient.invalidateQueries({ queryKey: ["notes"] });
+//     setIsModalOpen(false);
+//   },
+// });
 
-  const handleCreateNote = (values: { title: string; content: string; tag: string }) => {
-    createNoteMutation.mutate(values);
-  };
+// const deleteNoteMutation = useMutation({
+//   mutationFn: deleteNote,
+//   onSuccess: () => {
+//     queryClient.invalidateQueries({ queryKey: ["notes"] });
+//   },
+// });
 
-  const handleDelete = (id: number) => {
-    deleteNoteMutation.mutate(id);
-  };
+  // const handleCreateNote = (values: { title: string; content: string; tag: string }) => {
+  //   createNoteMutation.mutate(values);
+  // };
+
+  // const handleDelete = (id: string) => {
+  //   deleteNoteMutation.mutate(id);
+  // };
 
   const handlePageChange = (selectedPage: number) => {
     setPage(selectedPage);
@@ -63,7 +68,7 @@ const deleteNoteMutation = useMutation({
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox value={search} onChange={setSearch} />
+        <SearchBox value={search} onChange={handleSearchChange} />
         {data && data.totalPages > 1 && (
           <Pagination pageCount={data.totalPages} currentPage={page} onPageChange={handlePageChange} />
         )}
@@ -72,19 +77,19 @@ const deleteNoteMutation = useMutation({
         </button>
       </header>
 
-        {isLoading && <Loader/>}
+        {isFetching && <Loader/>}
         {isError && <p>Error: {(error as Error).message}</p>}
-        {data && data.notes.length === 0 && !isLoading && (
+        {data && data.notes.length === 0 && !isFetching && (
             <p className={css.notfound}>No notes found for "{debouncedSearch}"</p>
     )}
-      {data && data.notes && data.notes.length > 0 && <NoteList notes={data.notes} onDelete={handleDelete} />}
+      {data && data.notes && data.notes.length > 0 && <NoteList notes={data.notes}  />}
       {isModalOpen && (
         <Modal onClose={closeModal}>
           <NoteForm
-            onSubmit={handleCreateNote}
+            // onSubmit={handleCreateNote}
             onCancel={closeModal}
-            isLoading={createNoteMutation.isPending}
-            error={createNoteMutation.isError ? (createNoteMutation.error as Error).message : null}
+            // isLoading={createNoteMutation.isPending}
+            // error={createNoteMutation.isError ? (createNoteMutation.error as Error).message : null}
           />
         </Modal>
       )}

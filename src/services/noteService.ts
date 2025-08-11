@@ -39,7 +39,7 @@ export const createNote = async (note: { title: string; content: string; tag: st
     return response.data;
 }
 
-export const deleteNote = async (id: number): Promise<Note> => {
+export const deleteNote = async (id: string): Promise<Note> => {
     const config = {
         headers: {
             Authorization: `Bearer ${myKey}`

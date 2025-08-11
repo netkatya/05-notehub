@@ -1,6 +1,9 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import css from './NoteForm.module.css';
 import { Formik, Form, Field, ErrorMessage, type FormikHelpers } from 'formik';
 import * as Yup from "yup";
+import { createNote } from '../../services/noteService';
+import type { Note } from '../../types/note';
 
 const NoteFormSchema = Yup.object().shape({
     title: Yup.string()    
@@ -26,17 +29,29 @@ const initialFormValues: FormValues = {
 };
 
 interface NoteFormProps {
-  onSubmit: (values: { title: string; content: string; tag: string }) => void;
-  onCancel: () => void;
-  isLoading?: boolean;
-  error?: string | null;
+  onCancel: () => void; 
 }
 
-export default function NoteForm({ onSubmit, onCancel, isLoading, error }: NoteFormProps) {
+export default function NoteForm({onCancel}: NoteFormProps) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<Note, Error, FormValues>({
+    mutationFn: createNote,
+
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      onCancel();
+    }
+  })
+
   const handleSubmit = (values: FormValues, formikHelpers: FormikHelpers<FormValues>) => {
-    onSubmit(values);
-    formikHelpers.resetForm();
-  };
+  mutation.mutate(values, {
+    onSuccess: () => {
+      formikHelpers.resetForm();
+    }
+  });
+};
 
   return (
     <Formik initialValues={initialFormValues} onSubmit={handleSubmit} validationSchema={NoteFormSchema}>
@@ -71,7 +86,7 @@ export default function NoteForm({ onSubmit, onCancel, isLoading, error }: NoteF
           <ErrorMessage name="tag" component="div" className={css.error} />
         </div>
 
-        {error && <div className={css.error}>{error}</div>}
+        {mutation.isError && <div className={css.error}>{(mutation.error as Error).message}</div>}
 
         <div className={css.actions}>
           <button type="button" className={css.cancelButton} onClick={onCancel}>
@@ -80,9 +95,9 @@ export default function NoteForm({ onSubmit, onCancel, isLoading, error }: NoteF
           <button
             type="submit"
             className={css.submitButton}
-            disabled={isLoading}
+            disabled={mutation.isPending}
           >
-            {isLoading ? 'Creating...' : 'Create note'}
+            {mutation.isPending ? 'Creating...' : 'Create note'}
           </button>
         </div>
       </Form>
