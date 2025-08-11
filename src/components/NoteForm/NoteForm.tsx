@@ -7,13 +7,15 @@ import type { Note } from '../../types/note';
 
 const NoteFormSchema = Yup.object().shape({
     title: Yup.string()    
-        .min(2, "Name must be at least 2 characters")
-        .max(30, "Name is too long")
-        .required("Name is required"),
+      .min(3, "Title must be at least 3 characters")
+      .max(50, "Title is too long")
+      .required("Title is required"),
     content: Yup.string()
-        .max(500, "Name is too long"),
+      .max(500, "Content is too long")
+      .notRequired(),
     tag: Yup.string()
-    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'])
+      .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'])
+      .required("Tag is required"),
 })
 
 interface FormValues {
